@@ -2,8 +2,8 @@
 
 ## Clustering Pipeline Comparisons 
 
-Using HPAP data - describe HPAP dataset
+Human Pancreas Analysis Program (HPAP): 292 donors purified islets scRNA-seq 10X-Chromium-GEX-3p-v2. Pipeline 1 uses starsolo for alignment, samtools for duplicate removal, cellbender for ambient RNA removal. Secondary script `cellbender_clusters.R` used for clustering annotation. Pipeline 2 uses salmon for alignment, scanpy for clustering, trajectory inference, differential expression. 
 
 ## UCell Gene Enrichment Scores 
 
-Using nPOD data - describe nPOD dataset
+Network for Pancreatic Organ donors with Diabetes: 64 donors whole pancreas endocrine and exocrine tissues, scRNA-seq, ATAC-seq, single sample multiome, and pooled multiome data. 
