@@ -289,23 +289,10 @@ SaveSeuratRds(npod1_react, file = "npod1_react_UCell.rds")
 
 #read in HPAP
 hpap <- readRDS("2023_01_27_hpap_res0p3.rds")
-#use HPAP metadatafile now too 
-#need to subset for only RNA HPAP
-hpap_meta = read.csv("231027_WE_Harmonized_Meta.csv")
-hpap_meta=hpap_meta[hpap_meta$Method == "RNA",]
-hpap_meta=hpap_meta[hpap_meta$Dataset == "HPAP",]
-#drop the T2Ds
-hpap_meta=hpap_meta[hpap_meta$DiabetesStatus != "T2D",]
-#specify single or multi AAB using metadatafile 
-library(dplyr)
-hpap_meta = hpap_meta %>%
-  mutate(classify = case_when(str_count(hpap_meta$AutoAB_Status, "\\+") > 1 & DiabetesStatus == "Non-diabetic" ~ 'MultipleAAB', 
-                              str_count(hpap_meta$AutoAB_Status, "\\+") == 1 & DiabetesStatus == "Non-diabetic" ~ 'SingleAAB',
-                              is.na(hpap_meta$AutoAB_Status) & DiabetesStatus == "Non-diabetic" ~ 'ND',
-                              DiabetesStatus == "T1D" ~ "T1D" 
-                              )) 
-#apply labels from metadata to the seurat object                               
-hpap$condition_subtype = hpap_meta$classify[match(hpap$library, hpap_meta$Donor)]
+#use HPAP metadatafile now too
+hpap_meta= read.csv("hpap_metadata2_rebecca.tsv", sep="\t")
+#apply labels from metadata to the seurat object
+hpap$condition_subtype = hpap_meta$diabetes_status[match(hpap$library, hpap_meta$donor_ID)]
 
 
 hpap_kegg <- irGSEA.score(object = hpap, assay = "RNA", 
@@ -313,7 +300,7 @@ hpap_kegg <- irGSEA.score(object = hpap, assay = "RNA",
                                      min.cells = 3, min.feature = 0,
                                      maxGSSize = 500,
                                      custom = T, geneset = msigdb.kegg, 
-                                     method = c("AUCell", "UCell"),
+                                     method = c("UCell"),
                                      aucell.MaxRank = NULL, ucell.MaxRank = NULL, 
                                      kcdf = 'Gaussian')
 
@@ -330,3 +317,116 @@ hpap_react <- irGSEA.score(object = hpap, assay = "RNA",
                           kcdf = 'Gaussian')
 
 SaveSeuratRds(hpap_react, file = "hpap_react_UCell.rds")
+
+#in "/tscc/projects/ps-gaultonlab/abhowell/npod1_data"
+npod1_kegg <- readRDS("npod1_kegg_UCell.rds")
+npod1_kegg_Ucell=as.data.frame(npod1_kegg@assays$UCell$scale.data)
+npod1_kegg_Ucell <- data.frame(t(npod1_kegg_Ucell))
+npod1_kegg_Ucell$cell = rownames(npod1_kegg_Ucell)
+#need to assign each cell barcode their cluster
+npod1_kegg_Ucell$celltype = as.data.frame(npod1_kegg$celltype_assignment2)
+npod1_kegg_Ucell$condition = npod1_kegg@meta.data$condition_subtype
+npod1_kegg_Ucell$donor = npod1_kegg@meta.data$samples
+
+#read in npod react and combine
+npod1_react <- readRDS("npod1_react_UCell.rds")
+npod1_react_Ucell=as.data.frame(npod1_react@assays$UCell$scale.data)
+npod1_react_Ucell <- data.frame(t(npod1_react_Ucell))
+npod1_react_Ucell$cell = rownames(npod1_react_Ucell)
+#need to assign each cell barcode their cluster
+npod1_react_Ucell$celltype = as.data.frame(npod1_react$celltype_assignment2)
+npod1_react_Ucell$condition = npod1_react@meta.data$condition_subtype
+npod1_react_Ucell$donor = npod1_react@meta.data$samples
+
+npod1_paths=cbind(npod1_kegg_Ucell, npod1_react_Ucell)
+
+#that's right for these we just dropped individuals we knew to be single AAB in NPOD
+#we did not have specific single AAB or multi AAB labels
+npod1_paths=npod1_paths[!npod1_paths$donor == "MM_403",]
+npod1_paths=npod1_paths[!npod1_paths$donor == "MM_401",]
+
+#select only beta cell
+npod1_paths=npod1_paths[npod1_paths$celltype$`npod1_kegg$celltype_assignment2` == 'Beta',]
+
+#fix odd column name
+npod1_paths$celltype = npod1_paths$celltype$`npod1_kegg$celltype_assignment2`
+
+#use only pathways that were signifigant
+kegglist = read.csv("kegglist.csv", header = FALSE)
+kegglist$V1 = gsub("_", ".", kegglist$V1)
+
+#second option for reactome paths
+reactlist = read.csv("reactome_list_drop2.csv", header = FALSE)
+reactlist$V1 = gsub("_", ".", reactlist$V1)
+reactlist_final = reactlist$V1[reactlist$V1 %in% colnames(npod1_paths)]
+
+npod1_paths=npod1_paths[,c(kegglist$V1,reactlist_final,"cell","donor","celltype","condition")]
+
+npod1_paths$database= "npod"
+
+#in "/tscc/projects/ps-gaultonlab/abhowell/npod1_data"
+hpap_kegg <- readRDS("hpap_kegg_UCell.rds")
+hpap_kegg_Ucell=as.data.frame(hpap_kegg@assays$UCell$scale.data)
+hpap_kegg_Ucell <- data.frame(t(hpap_kegg_Ucell))
+hpap_kegg_Ucell$cell = rownames(hpap_kegg_Ucell)
+#need to assign each cell barcode their cluster
+hpap_kegg_Ucell$celltype = as.data.frame(hpap_kegg$cell_type)
+hpap_kegg_Ucell$condition = hpap_kegg@meta.data$condition_subtype
+hpap_kegg_Ucell$donor = hpap_kegg@meta.data$library
+
+
+
+#read in npod react and combine
+hpap_react <- readRDS("hpap_react_UCell.rds")
+hpap_react_Ucell=as.data.frame(hpap_react@assays$UCell$scale.data)
+hpap_react_Ucell <- data.frame(t(hpap_react_Ucell))
+hpap_react_Ucell$cell = rownames(hpap_react_Ucell)
+#need to assign each cell barcode their cluster
+hpap_react_Ucell$celltype = as.data.frame(hpap_react$cell_type)
+hpap_react_Ucell$condition = hpap_react@meta.data$condition_subtype
+hpap_react_Ucell$donor = hpap_react@meta.data$library
+
+hpap_paths=cbind(hpap_kegg_Ucell, hpap_react_Ucell)
+
+#drop few multi AAbs in HPAP
+#NAs were T2Ds drop those too
+hpap_paths=hpap_paths[!hpap_paths$condition == "Multiple",]
+hpap_paths=hpap_paths[!is.na(hpap_paths$condition),]
+
+
+#select only beta cell
+hpap_paths=hpap_paths[hpap_paths$celltype$`hpap_kegg$cell_type` == 'Beta',]
+
+#fix odd column name
+hpap_paths$celltype = hpap_paths$celltype$`hpap_kegg$cell_type`
+
+#use only pathways that were signifigant
+kegglist = read.csv("kegglist.csv", header = FALSE)
+kegglist$V1 = gsub("_", ".", kegglist$V1)
+
+#second option for reactome paths
+reactlist = read.csv("reactome_list_drop2.csv", header = FALSE)
+reactlist$V1 = gsub("_", ".", reactlist$V1)
+reactlist_final = reactlist$V1[reactlist$V1 %in% colnames(hpap_paths)]
+
+hpap_paths=hpap_paths[,c(kegglist$V1,reactlist_final,"cell","donor","celltype","condition")]
+
+hpap_paths$database= "hpap"
+
+combined_data=rbind(npod1_paths,hpap_paths)
+
+#encodings for disease state are not the same - fix that
+unique(combined_data$condition)
+library(dplyr)
+combined_data = combined_data %>%
+  mutate(reclassify = case_when(condition == "ND" ~ 'ND',
+                                condition == "T1D_early" ~ 'Early',
+                                condition == "Early" ~ 'Early',
+                                condition == "T1D_late" ~ 'Late',
+                                condition == "Late" ~ 'Late',
+                                condition == "Aab" ~ 'MultiAab',
+                                condition == "One" ~ 'SingleAab'))
+
+write.csv(combined_data, "combined_npod_hpap_kegg_react.csv")
+
+
