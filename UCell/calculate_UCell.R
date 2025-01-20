@@ -312,7 +312,7 @@ hpap_react <- irGSEA.score(object = hpap, assay = "RNA",
                           min.cells = 3, min.feature = 0,
                           maxGSSize = 500,
                           custom = T, geneset = msigdb.react, 
-                          method = c("AUCell", "UCell"),
+                          method = c("UCell"),
                           aucell.MaxRank = NULL, ucell.MaxRank = NULL, 
                           kcdf = 'Gaussian')
 
