@@ -1,0 +1,110 @@
+---
+title: "Pathway Analysis NPOD1 and HPAP"
+output: html_document
+date: "2025-01-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Modeling resources:
+https://sscc.wisc.edu/sscc/pubs/MM/MM_TestEffects.html
+https://mspeekenbrink.github.io/sdam-r-companion/bayesian-estimation-with-brms.html 
+https://stats.stackexchange.com/questions/237512/how-to-perform-post-hoc-test-on-lmer-model
+https://www.nicolaromano.net/data-thoughts/glms-for-binary-outcomes/#ib-toc-anchor-4
+https://stats.stackexchange.com/questions/531542/the-results-of-logistic-regression-with-glmer-and-glm-are-quite-different 
+https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/
+https://search.r-project.org/CRAN/refmans/lite/html/Bernoulli.html
+https://sscc.wisc.edu/sscc/pubs/MM/MM_TestEffects.html
+https://stats.oarc.ucla.edu/r/dae/logit-regression/
+https://stackoverflow.com/questions/24019807/how-to-compare-a-model-with-no-random-effects-to-a-model-with-a-random-effect-us
+https://stats.stackexchange.com/questions/138223/how-to-test-if-my-distribution-is-multimodal
+
+```{r data load npod}
+setwd("/tscc/projects/ps-gaultonlab/abhowell/npod1_data/")
+combined_data=read.csv("combined_npod_hpap_kegg_react_UCell.csv")
+```
+
+
+```{r, error=TRUE, include = FALSE}
+#use include = False to comment out an entier code chunk 
+#fitting logistic regression with donor as random variable
+library(lme4)
+library(multcomp)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+combined_data$group_database = paste(combined_data$reclassify,combined_data$database)
+
+#create special group of condition+database to sort out HPAP NDs from NPOS NDs etc
+
+#The p-value of 1 is much larger than .05, so the variance associated with the groups is likely to have occurred by chance.
+#https://sscc.wisc.edu/sscc/pubs/MM/MM_TestEffects.html
+#this asks "does incuding donor as a random effect matter? Do I need to control for it? Because if not I can just estimate the
+#p probability of success using all data don't have to subset it 
+
+x=colnames(combined_data)
+#dont eprform this for the group, value, mean columns etc
+x=head(x,-7)
+x=tail(x,-1)
+
+#tester
+for (i in x){
+print(i) 
+
+plot1=ggplot(combined_data, aes(x = group_database, y = combined_data[[i]], fill= group_database)) + 
+  labs(y=i) + 
+  geom_violin(trim=FALSE) + 
+  theme(axis.text.x = element_text(angle = 45)) 
+
+print(plot1)
+
+ 
+}
+
+
+```
+
+```{r, error=TRUE}
+combined_data$group_database = paste(combined_data$reclassify,combined_data$database)
+
+combined_data_binary = combined_data %>%
+  mutate(across(-c(cell, donor, celltype, condition, database, reclassify, X, group_database), ~ifelse( .x > 0, 1, 0)))
+  
+#just runningit first to get category names and regular means not mle est
+group_mean1 = aggregate(x = combined_data_binary[, 2:129], list(combined_data_binary$group_database),
+                      FUN = mean)
+
+berns=as.data.frame(group_mean1$Group.1)
+x=colnames(combined_data)
+#dont eprform this for the group, value, mean columns etc
+x=head(x,-7)
+x=tail(x,-1)
+
+for (i in x){
+  
+  tryCatch({
+    
+group_mean<- aggregate(x= combined_data_binary[[i]], by = list(combined_data_binary$group_database),
+                      FUN = lite::fitBernoulli)
+  
+data = as.data.frame(unlist(group_mean$x[,"mle"]))
+data = round(1-(round(data, digits = 3)), digits = 3)
+colnames(data) = paste(i,"_mle")
+
+berns <- cbind(berns, data)
+
+gmm <- glmer(combined_data_binary[[i]] ~ reclassify + database + (1 | donor), data = combined_data_binary, family = binomial())
+summary(gmm)
+
+}, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+  
+}
+
+all_est = cbind(group_mean1, berns)
+all_est <- data.frame(t(all_est))
+
+
+```
