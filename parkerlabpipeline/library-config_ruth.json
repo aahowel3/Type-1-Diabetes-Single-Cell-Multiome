@@ -1,0 +1,35 @@
+{
+    "libraries": {
+        "HPAP-101": {
+            "genome": [
+                "hg38"
+            ],
+            "readgroups": {
+                "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/PAP-101_FGC2390_106840_S14_L001": {
+                    "1": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2390_106840_S14_L001_R1_001.fastq.gz",
+                    "2": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2390_106840_S14_L001_R2_001.fastq.gz"
+                },
+                "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2390_106840_S14_L002": {
+                    "1": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2390_106840_S14_L002_R1_001.fastq.gz",
+                    "2": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2390_106840_S14_L002_R2_001.fastq.gz"
+                },
+                "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2430_106840_S12_L001": {
+                    "1": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2430_106840_S12_L001_R1_001.fastq.gz",
+                    "2": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2430_106840_S12_L001_R2_001.fastq.gz"
+                },
+                "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2430_106840_S12_L002": {
+                    "1": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2430_106840_S12_L002_R1_001.fastq.gz",
+                    "2": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2430_106840_S12_L002_R2_001.fastq.gz"
+                },
+                "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2507_106840_S11_L002": {
+                    "1": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2507_106840_S11_L002_R1_001.fastq.gz",
+                    "2": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2507_106840_S11_L002_R2_001.fastq.gz"
+                },
+                "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2512_106840_S11_L001": {
+                    "1": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2512_106840_S11_L001_R1_001.fastq.gz",
+                    "2": "/tscc/projects/ps-gaultonlab/relgamal/HPAP_RNA/HPAP-101/HPAP-101_FGC2512_106840_S11_L001_R2_001.fastq.gz"
+                }
+            }
+        }
+    }
+}
