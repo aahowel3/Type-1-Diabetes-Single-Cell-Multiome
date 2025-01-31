@@ -47,4 +47,8 @@ bim_issue$ref_coutn = nchar(bim_issue$ref)
 bim_issue$combined = bim_issue$alt_coutn + bim_issue$ref_coutn
 bim_sevissue = bim_issue[bim_issue$combined == 2, ]
 
+#file to prepare for bim/bed file modify command
+#plink1.9 --bfile PREFIX_OF_PLINK_FILES --extract VARIANT_LIST --keep-allele-order --make-bed --out NEW_PLINK_PREFIX
+write.table(return_37$RefSNP_id, "selected_rsIDS.csv", row.names = FALSE, quote=FALSE)
+
 
