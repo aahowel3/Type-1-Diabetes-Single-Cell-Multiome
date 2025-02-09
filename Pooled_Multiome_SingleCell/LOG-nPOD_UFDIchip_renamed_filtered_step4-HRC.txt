@@ -1,0 +1,38 @@
+Options Set:
+Reference Panel:             HRC
+Bim filename:                nPOD_UFDIchip_renamed_filtered_step4.bim
+Reference filename:          PASS.Variantsbravo-dbsnp-all.tab.gz
+Allele frequencies filename: nPOD_UFDIchip_renamed_filtered_step4.frq
+Allele frequency threshold:  0.2
+
+
+Matching to HRC
+
+Position Matches
+ ID matches HRC 0
+ ID Doesn't match HRC 97791
+ Total Position Matches 97791
+ID Match
+ Position different from HRC 0
+No Match to HRC 493431
+Skipped (XY, Y, MT) 77
+Total in bim file 591299
+Total processed 591299
+
+Indels 0
+
+SNPs not changed 12335
+SNPs to change ref alt 28567
+Strand ok 29328
+Total Strand ok 40902
+
+Strand to change 22686
+Total checked 97791
+Total checked Strand 52014
+Total removed for allele Frequency diff > 0.2 30639
+Palindromic SNPs with Freq > 0.4 76
+
+
+Non Matching alleles 45701
+ID and allele mismatching 45701; where HRC is . 0
+Duplicates removed 0
