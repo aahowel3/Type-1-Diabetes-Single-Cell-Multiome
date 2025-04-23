@@ -15,3 +15,5 @@ NPOD2 Clustering and Annotation: /nfs/lab/welison/mega_pancreas/notebooks/single
 Spleen Clustering and Annotation: /home/ahowell/Spleen_celltype_annotation_AH_4_4_25.ipynb <br /> 
 NPOD2 + Spleen + PLN Integration with Harmony: /nfs/lab/rlmelton/npod/notebooks/postdoc/pilotIntegration_Hillbloom_PLN_PancGRS.ipynb <br />
 
+# Genotyping off ATAC
+https://www.notion.so/Variant-Calling-122451be7c2d80c39987d702568d8ea9 
