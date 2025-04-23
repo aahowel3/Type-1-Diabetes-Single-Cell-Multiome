@@ -17,3 +17,12 @@ NPOD2 + Spleen + PLN Integration with Harmony: /nfs/lab/rlmelton/npod/notebooks/
 
 # Genotyping off ATAC
 https://www.notion.so/Variant-Calling-122451be7c2d80c39987d702568d8ea9 
+
+# Michigan HLA Imputation
+https://imputationserver.sph.umich.edu/#! 
+Log in to Michigan HLA and upload chr 6 file with following selections
+Reference Panel: Four-digit Multi-Ethnic HLA Reference Panel (GRCh37/hg19)
+Phasing: Eagle Phased
+Mode: Quality Control and Imputation
+Michigan will send you an email when the imputation results are ready
+Follow the link in your email and find the curl command under imputation results and link for downloading all files
