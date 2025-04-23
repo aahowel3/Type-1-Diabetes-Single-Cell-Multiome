@@ -1,3 +1,6 @@
+# Convert Genotype Array to VCF via plink
+https://www.notion.so/Demuxlet-Genotype-array-to-vcfs-c16ac0bc3fd34433a81622948d89547f
+
 # Downloading TopMed imputation results
 ## Unzip and check files
 ## Replace qvMG1IL@Gq0gj with the password in the topmed email
