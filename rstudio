@@ -12,6 +12,9 @@
 #SBATCH --export=ALL
 #SBATCH --output=rstudio.o%j.%N
 
+#save it in a folder called rstudio_server and in that folder you also have to have an empty
+#run and var-lib-rstudio-server as well as an empty file database.conf under the same directory of the job script
+#launch it with sbatch rstudio - returns a .tscc file and a .url file, nano into the .url file, paste that link in your browser 
 
 declare -xr REVERSE_PROXY_FQDN='tscc-user-content.sdsc.edu'
 declare -xr PRIVATE_DNS_DOMAIN='local'
