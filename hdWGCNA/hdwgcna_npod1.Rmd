@@ -1,0 +1,173 @@
+---
+title: "hdwgcna_npod1"
+output: html_document
+date: "2025-05-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r hdwgcna}
+#https://smorabit.github.io/hdWGCNA/articles/basic_tutorial.html
+#HDWGCNA for NPOD1
+
+# single-cell analysis package
+library(Seurat)
+
+# plotting and data science packages
+library(tidyverse)
+library(cowplot)
+library(patchwork)
+
+#yuwu you were so right about using isntall from source 
+#im sorry I ever doubted you 
+#install.packages('WGCNA',type="source")
+#BiocManager::install("GeneOverlap")
+#library(GeneOverlap)
+#install_github("wjawaid/enrichR")
+#library(enrichR)
+
+#library(devtools)
+#devtools::install_github('smorabit/hdWGCNA', ref='dev')
+
+# co-expression network analysis packages:
+library(WGCNA)
+library(hdWGCNA)
+
+# using the cowplot theme for ggplot
+theme_set(theme_cowplot())
+
+# set random seed for reproducibility
+set.seed(12345)
+
+# optionally enable multithreading
+enableWGCNAThreads(nThreads = 8)
+
+
+# load the Zhou et al snRNA-seq dataset
+seurat_obj <- readRDS('/tscc/projects/ps-gaultonlab/abhowell/npod1_data/RNA_final_20230515_rawMTxAssayIncl.rds')
+
+#seurat_obj <- readRDS('/tscc/nfs/home/abhowell/rstudio_server/hdWGCNA_object.rds')
+
+seurat_obj <- SeuratObject::UpdateSeuratObject(seurat_obj)
+
+npod1meta=as.data.frame(seurat_obj@meta.data)
+
+
+p <- DimPlot(seurat_obj, group.by='celltype_assignment2', label=TRUE) +
+  umap_theme() + ggtitle('Rebecca NPOD1 RNA only Whole Pancreas') + NoLegend()
+
+p
+
+seurat_obj <- SetupForWGCNA(
+  seurat_obj,
+  gene_select = "fraction", # the gene selection approach
+  fraction = 0.05, # fraction of cells that a gene needs to be expressed in order to be included
+  wgcna_name = "npod1" # the name of the hdWGCNA experiment
+)
+
+#check what the condition breakdown is for the Zhou example
+#seurat_obj <- readRDS("/tscc/nfs/home/abhowell/Zhou_2020_control.rds")
+#meta = as.data.frame(seurat_obj@meta.data)
+
+###
+###the example here for reduction was "harmony" and in this objec there are several reductions
+#pca, harmony.rna, umap.rna, lsi, harmony.atac, umap.atac, umap.wnn, umap.harmony.atac
+#not sure which one came first or last or the right one to use
+#so lets try this one 
+seurat_obj <- MetacellsByGroups(
+  seurat_obj = seurat_obj,
+  group.by = c("celltype_assignment2", "samples"), # specify the columns in seurat_obj@meta.data to group by
+  reduction = 'harmony', # select the dimensionality reduction to perform KNN on
+  k = 25, # nearest-neighbors parameter
+  max_shared = 10, # maximum number of shared cells between two metacells
+  ident.group = 'celltype_assignment2' # set the Idents of the metacell seurat object
+)
+
+# normalize metacell expression matrix:
+seurat_obj <- NormalizeMetacells(seurat_obj)
+
+seurat_obj <- SetDatExpr(
+  seurat_obj,
+group_name = "Beta",
+  group.by='celltype_assignment2', # the metadata column containing the cell type info. This same column should have also been used in MetacellsByGroups
+  assay = 'RNA', # using RNA assay
+  layer = 'data' # using normalized data
+)
+
+
+seurat_obj <- TestSoftPowers(
+  seurat_obj,
+  networkType = 'signed' # you can also use "unsigned" or "signed hybrid"
+)
+
+# plot the results:
+plot_list <- PlotSoftPowers(seurat_obj)
+
+# assemble with patchwork
+wrap_plots(plot_list, ncol=2)
+
+
+power_table <- GetPowerTable(seurat_obj)
+head(power_table)
+
+
+seurat_obj <- ConstructNetwork(
+  seurat_obj,
+  overwrite_tom = TRUE,
+  tom_name = 'npod1' # name of the topoligical overlap matrix written to disk
+)
+
+
+PlotDendrogram(seurat_obj, main='NPOD1 hdWGCNA Dendrogram')
+
+
+TOM <- GetTOM(seurat_obj)
+
+
+seurat_obj <- ModuleEigengenes(
+  seurat_obj,
+  group.by.vars="samples"
+)
+
+
+# harmonized module eigengenes:
+hMEs <- GetMEs(seurat_obj)
+
+# module eigengenes:
+MEs <- GetMEs(seurat_obj, harmonized=FALSE)
+
+seurat_obj <- ModuleConnectivity(
+  seurat_obj,
+  group.by = 'celltype_assignment2',
+group_name = "Beta"
+)
+
+
+seurat_obj <- ResetModuleNames(
+  seurat_obj,
+  new_name = "npod1-M"
+)
+
+
+p <- PlotKMEs(seurat_obj, ncol=5)
+
+p
+
+modules <- GetModules(seurat_obj) %>% subset(module != 'grey')
+
+hub_df <- GetHubGenes(seurat_obj, n_hubs = 10)
+
+saveRDS(seurat_obj, file='hdWGCNA_object.rds')
+
+
+
+```
+
